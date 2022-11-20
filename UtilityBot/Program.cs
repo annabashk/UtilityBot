@@ -4,6 +4,10 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Types;
+using UtilityBot.Configuration;
+using UtilityBot.Controllers;
+using UtilityBot.Services;
 
 namespace UtilityBot
 {
@@ -25,10 +29,26 @@ namespace UtilityBot
 
         static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ITelegramBotClient>(provider => new
-            TelegramBotClient("5529272210:AAGUt74yroDJv9py-XCVWrRU7XK5qckpV6Y"));
+            AppSettings appSettings = BuildAppSettings();
+            services.AddSingleton(BuildAppSettings());
 
+            services.AddScoped<IStorage, MemoryStorage>();
+
+            services.AddTransient<DefaultMessageController>();
+            services.AddTransient<VoiceMessageController>();
+            services.AddTransient<TextMessageController>();
+            services.AddTransient<InlineKeyboardController>();
+
+            services.AddSingleton<ITelegramBotClient>(provider => new TelegramBotClient(appSettings.BotToken));
             services.AddHostedService<Bot>();
+        }
+
+        static AppSettings BuildAppSettings()
+        {
+            return new AppSettings()
+            {
+                BotToken = "5529272210:AAGUt74yroDJv9py-XCVWrRU7XK5qckpV6Y",
+            };
         }
     }
 }
